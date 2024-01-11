@@ -53,7 +53,44 @@ async def summarize(ctx: commands.Context):
         res = await session.post("https://api.together.xyz/inference", json={
             "model": "togethercomputer/llama-2-70b-chat",
             "max_tokens": 512,
-            "prompt": "Introduce yourself as a chatbot named ryanator. Give a short summary of the content of these text messages:\n[" + text_data + "]\n[SUMMARY]:",
+            "prompt": "Give a short summary of the content of these text messages:\n[" + text_data + "]\n[SUMMARY]:",
+            "request_type": "language-model-inference",
+            "temperature": 0.15,
+            "top_p": 0.7,
+            "top_k": 50,
+            "repetition_penalty": 1,
+            "stop": [
+                "[/INST]",
+                "</s>"
+            ],
+            "negative_prompt": "",
+            "sessionKey": "2e59071178ae2b05e68015136fb8045df30c3680",
+            "safety_model": "",
+            "repetitive_penalty": 1,
+            "update_at": "2023-10-28T20:07:51.077Z"
+            }, headers={
+                "Authorization": "Bearer " + settings.togetherai_key,
+        })
+        res = await res.json()
+        await ctx.reply(res["output"]["choices"][0]["text"])
+
+@client.hybrid_command()
+async def cute(ctx: commands.Context):
+    await ctx.send("im thinking")
+
+    text_data = ""
+    for message in client.chat_history:
+        text_data += message[0] + "\n"
+
+    if text_data == "":
+        await ctx.reply("aint shit happen")
+        return
+
+    async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
+        res = await session.post("https://api.together.xyz/inference", json={
+            "model": "togethercomputer/llama-2-70b-chat",
+            "max_tokens": 512,
+            "prompt": "Reply to these messages as if you were a cute e-girl T-T:\n[" + text_data + "]\n[REPLY]:",
             "request_type": "language-model-inference",
             "temperature": 0.15,
             "top_p": 0.7,
