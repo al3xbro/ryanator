@@ -45,11 +45,15 @@ async def summarize(ctx: commands.Context):
     for message in client.chat_history:
         text_data += message[0] + "\n"
 
+    if text_data == "":
+        await ctx.reply("aint shit happen")
+        return
+
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
         res = await session.post("https://api.together.xyz/inference", json={
             "model": "togethercomputer/llama-2-70b-chat",
             "max_tokens": 512,
-            "prompt": "Give a summary of the content of these text message:\n\n" + text_data + "\n\n[SUMMARY]:",
+            "prompt": "Your username is ryanator. Give a short and playful summary of the content of these text messages:\n[" + text_data + "]\n[SUMMARY]:",
             "request_type": "language-model-inference",
             "temperature": 0.15,
             "top_p": 0.7,
