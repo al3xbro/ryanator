@@ -53,7 +53,7 @@ async def summarize(ctx: commands.Context):
         res = await session.post("https://api.together.xyz/inference", json={
             "model": "togethercomputer/llama-2-70b-chat",
             "max_tokens": 512,
-            "prompt": "Give a short summary of the content of these text messages as if you were a chat bot named ryanator:\n[" + text_data + "]\n[SUMMARY]:",
+            "prompt": "Introduce yourself as a chatbot named ryanator. Give a short summary of the content of these text messages:\n[" + text_data + "]\n[SUMMARY]:",
             "request_type": "language-model-inference",
             "temperature": 0.15,
             "top_p": 0.7,
