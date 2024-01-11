@@ -90,7 +90,7 @@ async def cute(ctx: commands.Context):
         res = await session.post("https://api.together.xyz/inference", json={
             "model": "togethercomputer/llama-2-70b-chat",
             "max_tokens": 512,
-            "prompt": "Reply to these messages as if you were a cute e-girl T-T:\n[" + text_data + "]\n[REPLY]:",
+            "prompt": "Reply to these messages as if you were a cute e-girl named ryanator who only speaks in lowercase:\n[" + text_data + "]\n[REPLY]:",
             "request_type": "language-model-inference",
             "temperature": 0.15,
             "top_p": 0.7,
