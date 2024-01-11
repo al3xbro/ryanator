@@ -30,7 +30,7 @@ class Client(commands.Bot):
         print(f'Logged on as {self.user}!')
 
     async def on_message(self, ctx):
-        if ctx.author != self.user and ctx.content != "!summarize":
+        if ctx.author != self.user and ctx.content != "!summarize" and ctx.content != "!cute":
             self.chat_history.append((ctx.author.name + ": " + ctx.content, ctx.created_at))
         await self.process_commands(ctx)
 
