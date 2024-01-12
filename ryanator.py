@@ -31,7 +31,7 @@ class Client(commands.Bot):
         else:
             await ctx.reply(error)
 
-    @tasks.loop(minutes=1)
+    @tasks.loop(hours=1)
     async def remove_old_messages(self):
         now = datetime.now()
         for k, message in enumerate(self.chat_history):
@@ -51,7 +51,7 @@ def reqJson(prompt: str):
         ],
         "generationConfig": {
             "temperature": 0.9,
-            "topK": 1,
+            "topK": 10,
             "topP": 1,
             "maxOutputTokens": 2048,
             "stopSequences": ["\n"]
