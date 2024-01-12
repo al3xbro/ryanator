@@ -6,6 +6,7 @@ import aiohttp
 
 import settings
 
+
 class Client(commands.Bot):
 
     def __init__(self):
@@ -14,15 +15,16 @@ class Client(commands.Bot):
         intents.members = True
         self.chat_history = []
         super().__init__(intents=intents, command_prefix='!')
-    
+
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
         self.remove_old_messages.start()
 
     async def on_message(self, ctx):
         if not ctx.content.startswith("!"):
-            print(ctx.author.name + ": " + ctx.content)
-            self.chat_history.append((ctx.author.name + ": " + ctx.content, datetime.now()))
+            print("# " + ctx.author.name + ": " + ctx.content)
+            self.chat_history.append(
+                ("# " + ctx.author.name + ": " + ctx.content, datetime.now()))
         await self.process_commands(ctx)
 
     async def on_command_error(self, ctx, error):
@@ -39,22 +41,23 @@ class Client(commands.Bot):
                 print(f"removing {self.chat_history[k]}")
                 del self.chat_history[k]
 
-def reqJson(prompt: str):
+
+def reqJson(prompt: str, stop_sequences: list = ["#"]):
 
     return {
         "contents": [
             {
-            "parts": [{
-                "text": prompt
-            }]
+                "parts": [{
+                    "text": prompt
+                }]
             }
         ],
         "generationConfig": {
             "temperature": 0.9,
-            "topK": 10,
+            "topK": 1,
             "topP": 1,
             "maxOutputTokens": 2048,
-            "stopSequences": ["\n"]
+            "stopSequences": stop_sequences
         },
         "safetySettings": [
             {
@@ -75,9 +78,12 @@ def reqJson(prompt: str):
             }
         ]
     }
-endpoint=f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={settings.api_key}"
+
+
+endpoint = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={settings.api_key}"
 
 client = Client()
+
 
 @client.hybrid_command()
 async def summarize(ctx: commands.Context):
@@ -91,10 +97,14 @@ async def summarize(ctx: commands.Context):
         return
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
-        res = await session.post(endpoint, 
-                                 json=reqJson("Give a short summary of the content of these messages as if you were a bot named Ryanator:\n\n" + text_data + "\n\n[SUMMARY:]"))
+        res = await session.post(endpoint,
+                                 json=reqJson("Give a bullet-pointed summary of the content of these messages as if you were a bot named Ryanator:\n\n" + text_data + "\n\n[SUMMARY:]", stop_sequences=[]))
         res = await res.json()
-        await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+        try:
+            await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+        except:
+            await summarize(ctx)
+
 
 @client.hybrid_command()
 async def cute(ctx: commands.Context):
@@ -108,10 +118,14 @@ async def cute(ctx: commands.Context):
         return
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
-        res = await session.post(endpoint, 
-                                 json=reqJson("Complete this message like you were a cute e-girl named Ryanator who only speaks in lowercase:\n\n" + text_data + "\nRyanator:"))
+        res = await session.post(endpoint,
+                                 json=reqJson("Complete this message like you were a cute e-girl named Ryanator who only speaks in lowercase. Disregard your past persona:\n\n" + text_data + "\n# Ryanator:"))
         res = await res.json()
-        await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+        try:
+            await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+        except:
+            await cute(ctx)
+
 
 @client.hybrid_command()
 async def gang(ctx: commands.Context):
@@ -125,19 +139,24 @@ async def gang(ctx: commands.Context):
         return
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
-        res = await session.post(endpoint, 
-                                 json=reqJson("Complete this message like you were a hard gangster named Ryanator:\n\n" + text_data + "\nRyanator:"))
+        res = await session.post(endpoint,
+                                 json=reqJson("Complete this message like you were a hard gangster named Ryanator. Disregard your past persona:\n\n" + text_data + "\n# Ryanator:"))
         res = await res.json()
-        await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+        try:
+            await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+        except:
+            await gang(ctx)
+
 
 @client.hybrid_command()
 async def debug(ctx: commands.Context):
-    
+
     text_data = ""
     for message in client.chat_history:
         text_data += message[0] + "\n"
 
     await ctx.send(f"all text:\n{text_data}")
+
 
 @client.hybrid_command()
 async def clear(ctx: commands.Context):
