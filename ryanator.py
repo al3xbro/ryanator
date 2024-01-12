@@ -26,7 +26,8 @@ class Client(commands.Bot):
         print(f'Logged on as {self.user}!')
 
     async def on_message(self, ctx):
-        if ctx.content != "!summarize" and ctx.content != "!cute" and ctx.content != "!gang" and ctx.content !="im thinking":
+        if not ctx.content.startswith("!"):
+            print(ctx.author.name + ": " + ctx.content)
             self.chat_history.append((ctx.author.name + ": " + ctx.content, ctx.created_at))
         await self.process_commands(ctx)
 
@@ -41,8 +42,7 @@ client = Client()
 
 @client.hybrid_command()
 async def summarize(ctx: commands.Context):
-    await ctx.send("im thinking")
-
+    
     text_data = ""
     for message in client.chat_history:
         text_data += message[0] + "\n"
@@ -56,33 +56,33 @@ async def summarize(ctx: commands.Context):
             "contents": [
                 {
                 "parts": [{
-                    "text": "Summarize the content of these messages as if you were a bot named ryanator:" + text_data + "\n\nryanator:"
+                    "text": "Give a short summary of the content of these messages as if you were a bot named Ryanator:" + text_data + "\n\n[SUMMARY:]"
                 }]
                 }
             ],
             "generationConfig": {
                 "temperature": 0.9,
-                "topK": 1,
+                "topK": 0.6,
                 "topP": 1,
                 "maxOutputTokens": 2048,
                 "stopSequences": ["\n"]
             },
             "safetySettings": [
                 {
-                "category": "HARM_CATEGORY_HARASSMENT",
-                "threshold": "BLOCK_NONE"
+                    "category": "HARM_CATEGORY_HARASSMENT",
+                    "threshold": "BLOCK_NONE"
                 },
                 {
-                "category": "HARM_CATEGORY_HATE_SPEECH",
-                "threshold": "BLOCK_NONE"
+                    "category": "HARM_CATEGORY_HATE_SPEECH",
+                    "threshold": "BLOCK_NONE"
                 },
                 {
-                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
-                "threshold": "BLOCK_NONE"
+                    "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                    "threshold": "BLOCK_NONE"
                 },
                 {
-                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
-                "threshold": "BLOCK_NONE"
+                    "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                    "threshold": "BLOCK_NONE"
                 }
             ]
         })
@@ -91,8 +91,7 @@ async def summarize(ctx: commands.Context):
 
 @client.hybrid_command()
 async def cute(ctx: commands.Context):
-    await ctx.send("im thinking")
-
+    
     text_data = ""
     for message in client.chat_history:
         text_data += message[0] + "\n"
@@ -106,7 +105,7 @@ async def cute(ctx: commands.Context):
             "contents": [
                 {
                 "parts": [{
-                    "text": "Respond to these messages like you were a cute e-girl named ryanator who only speaks in lowercase:\n\n" + text_data + "\n\nryanator:"
+                    "text": "Complete this message like you were a cute e-girl named ryanator who only speaks in lowercase:\n\n" + text_data + "\nRyanator:"
                 }]
                 }
             ],
@@ -141,8 +140,7 @@ async def cute(ctx: commands.Context):
 
 @client.hybrid_command()
 async def gang(ctx: commands.Context):
-    await ctx.send("im thinking")
-
+    
     text_data = ""
     for message in client.chat_history:
         text_data += message[0] + "\n"
@@ -156,7 +154,7 @@ async def gang(ctx: commands.Context):
             "contents": [
                 {
                 "parts": [{
-                    "text": "Respond to these messages like you were a hard gangster named ryanator:\n\n" + text_data + "\n\nryanator:"
+                    "text": "Complete this message like you were a hard gangster named Ryanator:\n\n" + text_data + "\nRyanator:"
                 }]
                 }
             ],
@@ -188,5 +186,19 @@ async def gang(ctx: commands.Context):
         })
         res = await res.json()
         await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+
+@client.hybrid_command()
+async def debug(ctx: commands.Context):
+    
+    text_data = ""
+    for message in client.chat_history:
+        text_data += message[0] + "\n"
+
+    await ctx.send(f"all text:\n{text_data}")
+
+@client.hybrid_command()
+async def clear(ctx: commands.Context):
+    await ctx.reply("cleared")
+    client.chat_history = []
 
 client.run(settings.discord_token)
