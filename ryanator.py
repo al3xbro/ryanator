@@ -1,14 +1,10 @@
-import asyncio
 import discord
 from discord.ext import tasks
 from discord.ext import commands
 from datetime import timedelta, datetime
-import together
 import aiohttp
 
 import settings
-
-together.api_key = settings.togetherai_key
 
 class Client(commands.Bot):
 
@@ -30,9 +26,15 @@ class Client(commands.Bot):
         print(f'Logged on as {self.user}!')
 
     async def on_message(self, ctx):
-        if ctx.author != self.user and ctx.content != "!summarize" and ctx.content != "!cute":
+        if ctx.content != "!summarize" and ctx.content != "!cute" and ctx.content != "!gang" and ctx.content !="im thinking":
             self.chat_history.append((ctx.author.name + ": " + ctx.content, ctx.created_at))
         await self.process_commands(ctx)
+
+    async def on_command_error(self, ctx, error):
+        if isinstance(error, commands.CommandNotFound):
+            await ctx.reply("not a command dumbahh")
+        else:
+            await ctx.reply(error)
 
 client = Client()
 
@@ -50,29 +52,42 @@ async def summarize(ctx: commands.Context):
         return
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
-        res = await session.post("https://api.together.xyz/inference", json={
-            "model": "togethercomputer/llama-2-70b-chat",
-            "max_tokens": 512,
-            "prompt": "Give a short summary of the content of these text messages:\n[" + text_data + "]\n[SUMMARY]:",
-            "request_type": "language-model-inference",
-            "temperature": 0.15,
-            "top_p": 0.7,
-            "top_k": 50,
-            "repetition_penalty": 1,
-            "stop": [
-                "[/INST]",
-                "</s>"
+        res = await session.post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={settings.api_key}", json={
+            "contents": [
+                {
+                "parts": [{
+                    "text": "Summarize the content of these messages as if you were a bot named ryanator:" + text_data + "\n\nryanator:"
+                }]
+                }
             ],
-            "negative_prompt": "",
-            "sessionKey": "2e59071178ae2b05e68015136fb8045df30c3680",
-            "safety_model": "",
-            "repetitive_penalty": 1,
-            "update_at": "2023-10-28T20:07:51.077Z"
-            }, headers={
-                "Authorization": "Bearer " + settings.togetherai_key,
+            "generationConfig": {
+                "temperature": 0.9,
+                "topK": 1,
+                "topP": 1,
+                "maxOutputTokens": 2048,
+                "stopSequences": ["\n"]
+            },
+            "safetySettings": [
+                {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_NONE"
+                }
+            ]
         })
         res = await res.json()
-        await ctx.reply(res["output"]["choices"][0]["text"])
+        await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
 
 @client.hybrid_command()
 async def cute(ctx: commands.Context):
@@ -87,28 +102,91 @@ async def cute(ctx: commands.Context):
         return
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
-        res = await session.post("https://api.together.xyz/inference", json={
-            "model": "togethercomputer/llama-2-70b-chat",
-            "max_tokens": 512,
-            "prompt": "Reply to these messages as if you were a cute e-girl named ryanator who only speaks in lowercase:\n[" + text_data + "]\n[REPLY]:",
-            "request_type": "language-model-inference",
-            "temperature": 0.15,
-            "top_p": 0.7,
-            "top_k": 50,
-            "repetition_penalty": 1,
-            "stop": [
-                "[/INST]",
-                "</s>"
+        res = await session.post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={settings.api_key}", json={
+            "contents": [
+                {
+                "parts": [{
+                    "text": "Respond to these messages like you were a cute e-girl named ryanator who only speaks in lowercase:\n\n" + text_data + "\n\nryanator:"
+                }]
+                }
             ],
-            "negative_prompt": "",
-            "sessionKey": "2e59071178ae2b05e68015136fb8045df30c3680",
-            "safety_model": "",
-            "repetitive_penalty": 1,
-            "update_at": "2023-10-28T20:07:51.077Z"
-            }, headers={
-                "Authorization": "Bearer " + settings.togetherai_key,
+            "generationConfig": {
+                "temperature": 0.9,
+                "topK": 1,
+                "topP": 1,
+                "maxOutputTokens": 2048,
+                "stopSequences": ["\n"]
+            },
+            "safetySettings": [
+                {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_NONE"
+                }
+            ]
         })
         res = await res.json()
-        await ctx.reply(res["output"]["choices"][0]["text"])
+        await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
 
-client.run(settings.token)
+@client.hybrid_command()
+async def gang(ctx: commands.Context):
+    await ctx.send("im thinking")
+
+    text_data = ""
+    for message in client.chat_history:
+        text_data += message[0] + "\n"
+
+    if text_data == "":
+        await ctx.reply("aint shit happen")
+        return
+
+    async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
+        res = await session.post(f"https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key={settings.api_key}", json={
+            "contents": [
+                {
+                "parts": [{
+                    "text": "Respond to these messages like you were a hard gangster named ryanator:\n\n" + text_data + "\n\nryanator:"
+                }]
+                }
+            ],
+            "generationConfig": {
+                "temperature": 0.9,
+                "topK": 1,
+                "topP": 1,
+                "maxOutputTokens": 2048,
+                "stopSequences": ["\n"]
+            },
+            "safetySettings": [
+                {
+                "category": "HARM_CATEGORY_HARASSMENT",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_HATE_SPEECH",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_SEXUALLY_EXPLICIT",
+                "threshold": "BLOCK_NONE"
+                },
+                {
+                "category": "HARM_CATEGORY_DANGEROUS_CONTENT",
+                "threshold": "BLOCK_NONE"
+                }
+            ]
+        })
+        res = await res.json()
+        await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+
+client.run(settings.discord_token)
