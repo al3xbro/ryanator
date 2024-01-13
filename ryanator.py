@@ -98,7 +98,7 @@ async def summarize(ctx: commands.Context):
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
         res = await session.post(endpoint,
-                                 json=reqJson("Give a bullet-pointed summary of the content of these messages as if you were a bot named Ryanator:\n\n" + text_data + "\n\n[SUMMARY:]", stop_sequences=[]))
+                                 json=reqJson("Provide a comprehensive but opinionated summary of this conversation. The summary should cover all the key points and main ideas presented in the original text, while also condensing the information into a concise and easy-to-understand format. Please ensure that the summary includes relevant details and examples, while avoiding any unnecessary information or repetition. The length of the summary should be appropriate for the length and complexity of the conversation, providing a clear and accurate overview without omitting any important information.\n\n" + text_data + "\n\n[SUMMARY:]", stop_sequences=[]))
         res = await res.json()
         try:
             await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
@@ -183,5 +183,6 @@ async def debug(ctx: commands.Context):
 async def clear(ctx: commands.Context):
     await ctx.reply("cleared")
     client.chat_history = []
+
 
 client.run(settings.discord_token)
