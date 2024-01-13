@@ -33,11 +33,11 @@ class Client(commands.Bot):
         else:
             await ctx.reply(error)
 
-    @tasks.loop(hours=1)
+    @tasks.loop(minutes=15)
     async def remove_old_messages(self):
         now = datetime.now()
         for k, message in enumerate(self.chat_history):
-            if now - message[1] > timedelta(minutes=15):
+            if now - message[1] > timedelta(hours=1):
                 print(f"removing {self.chat_history[k]}")
                 del self.chat_history[k]
 
