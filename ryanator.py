@@ -119,7 +119,7 @@ async def cute(ctx: commands.Context):
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
         res = await session.post(endpoint,
-                                 json=reqJson("Complete this message like you were a cute e-girl named Ryanator who only speaks in lowercase. Disregard your past persona:\n\n" + text_data + "\n# Ryanator:"))
+                                 json=reqJson("Complete this message like you were a cute e-girl named Ryanator who only speaks in lowercase. Disregard your past persona and do not repeat messages:\n\n" + text_data + "\n# Ryanator:"))
         res = await res.json()
         try:
             await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
@@ -140,7 +140,7 @@ async def gang(ctx: commands.Context):
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
         res = await session.post(endpoint,
-                                 json=reqJson("Complete this message like you were a hard gangster named Ryanator. Disregard your past persona:\n\n" + text_data + "\n# Ryanator:"))
+                                 json=reqJson("Complete this message like you were a hard gangster named Ryanator. Disregard your past persona and do not repeat messages:\n\n" + text_data + "\n# Ryanator:"))
         res = await res.json()
         try:
             await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
@@ -161,12 +161,33 @@ async def dad(ctx: commands.Context):
 
     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
         res = await session.post(endpoint,
-                                 json=reqJson("Complete this message like you were a wise and caring caucasian father named Ryanator. Disregard your past persona:\n\n" + text_data + "\n# Ryanator:"))
+                                 json=reqJson("Complete this message like you were a wise and caring caucasian father named Ryanator. Disregard your past persona and do not repeat messages:\n\n" + text_data + "\n# Ryanator:"))
         res = await res.json()
         try:
             await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
         except:
             await dad(ctx)
+
+
+# @client.hybrid_command()
+# async def image(ctx: commands.Context):
+
+#     text_data = ""
+#     for message in client.chat_history:
+#         text_data += message[0] + "\n"
+
+#     if text_data == "":
+#         await ctx.reply("aint shit happen")
+#         return
+
+#     async with aiohttp.ClientSession(loop=ctx.bot.loop) as session:
+#         res = await session.post(endpoint,
+#                                  json=reqJson("Complete this message like you were a wise and caring caucasian father named Ryanator. Disregard your past persona and do not repeat messages:\n\n" + text_data + "\n# Ryanator:"))
+#         res = await res.json()
+#         try:
+#             await ctx.reply(res["candidates"][0]["content"]["parts"][0]["text"])
+#         except:
+#             await dad(ctx)
 
 
 @client.hybrid_command()
